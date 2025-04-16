@@ -1,2 +1,4 @@
 # The image files shouldn't be pushed to GitHub
 images
+
+__pycache__/
