@@ -49,15 +49,13 @@ def mtcnn_face_detect_webcam():
             break
 
         boxes, _, landmarks = mtcnn.detect(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)), landmarks=True)
-        if boxes is None and landmarks is None:
-            break
+        if boxes is not None and landmarks is not None:
+            for box, landmark_set in zip(boxes, landmarks):
+                x1, y1, x2, y2 = map(int, box)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-        for box, landmark_set in zip(boxes, landmarks):
-            x1, y1, x2, y2 = map(int, box)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
-            for (x, y) in landmark_set:
-                cv2.circle(frame, (int(x), int(y)), 2, (255, 0, 0), 2)
+                for (x, y) in landmark_set:
+                    cv2.circle(frame, (int(x), int(y)), 2, (255, 0, 0), 2)
 
         cv2.imshow("Webcam Face Detection", helpers.calculate_frame(frame))
 

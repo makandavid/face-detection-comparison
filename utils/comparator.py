@@ -8,6 +8,8 @@ def compare():
     detected_faces_mtcnn = {}
     detected_faces_viola_jones = {}
     directory = os.fsencode("images")
+    mtcnn_time = 0
+    viola_jones_time = 0
     for d in os.listdir(directory):
         sub_directory = os.path.join(directory, d)
         if not os.path.isdir(sub_directory):
@@ -15,9 +17,6 @@ def compare():
         
         detected_faces_mtcnn[d.decode('utf-8')] = [0, 0]
         detected_faces_viola_jones[d.decode('utf-8')] = [0, 0]
-
-        mtcnn_time = 0
-        viola_jones_time = 0
 
         for img in os.listdir(sub_directory):
             img_path = os.path.join(sub_directory, img)
