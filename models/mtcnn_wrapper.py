@@ -16,15 +16,15 @@ def mtcnn_face_detect(image_path, show: bool=True):
         return 0
     rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     boxes, _, landmarks = mtcnn.detect(rgb_img, landmarks=True)
-    if boxes is None or landmarks is None:
-        return 0
-    
-    for box, landmark_set in zip(boxes, landmarks):
-        x1, y1, x2, y2 = map(int, box)
-        cv2.rectangle(rgb_img, (x1, y1), (x2, y2), (0, 255, 0), 5)
+    num_faces = 0
+    if boxes is not None and landmarks is not None:
+        num_faces = len(boxes)
+        for box, landmark_set in zip(boxes, landmarks):
+            x1, y1, x2, y2 = map(int, box)
+            cv2.rectangle(rgb_img, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
-        for (x, y) in landmark_set:
-            cv2.circle(rgb_img, (int(x), int(y)), 2, (255, 0, 0), 2)
+            for (x, y) in landmark_set:
+                cv2.circle(rgb_img, (int(x), int(y)), 2, (255, 0, 0), 2)
 
     if show:
         cv2.namedWindow("Detected Faces", cv2.WINDOW_FULLSCREEN)
@@ -32,7 +32,7 @@ def mtcnn_face_detect(image_path, show: bool=True):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    return len(boxes)
+    return num_faces
 
     
 def mtcnn_face_detect_webcam():

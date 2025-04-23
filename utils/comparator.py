@@ -15,8 +15,9 @@ def compare():
         if not os.path.isdir(sub_directory):
             continue
         
-        detected_faces_mtcnn[d.decode('utf-8')] = [0, 0]
-        detected_faces_viola_jones[d.decode('utf-8')] = [0, 0]
+        num_images = len(os.listdir(sub_directory))
+        detected_faces_mtcnn[d.decode('utf-8')] = [0, 0, num_images]
+        detected_faces_viola_jones[d.decode('utf-8')] = [0, 0, num_images]
 
         for img in os.listdir(sub_directory):
             img_path = os.path.join(sub_directory, img)
@@ -48,7 +49,8 @@ def extract_data(detected_faces: dict):
     features = list(detected_faces.keys())
     num_faces = [v[0] for v in detected_faces.values()]
     false_positives = [v[1] for v in detected_faces.values()]
-    return features, num_faces, false_positives
+    num_images = [v[2] for v in detected_faces.values()]
+    return features, num_faces, false_positives, num_images
 
 def by_angle(detected_faces: dict):
     by_angle = {}
@@ -91,53 +93,71 @@ def show_graphs(detected_faces: dict, is_mtcnn: bool):
     fig.canvas.manager.set_window_title("MTCNN Face Detection" if is_mtcnn else "Viola-Jones Face Detection")
     fig.suptitle("MTCNN Face Detection" if is_mtcnn else "Viola-Jones Face Detection")
 
-    features, num_faces, false_positives = extract_data(by_angle(detected_faces))
+    features, num_faces, false_positives, num_images = extract_data(by_angle(detected_faces))
+    percent_faces, percent_false_positives = calculate_percentage(num_faces, false_positives, num_images)
     x = np.arange(len(features))
 
-    ax1.bar(x - width/2, num_faces, width, label='Detected Faces', color='skyblue')
-    ax1.bar(x + width/2, false_positives, width, label='False Positives', color='salmon')
+    ax1.bar(x - width/2, percent_faces, width, label='Detected Faces', color='skyblue')
+    ax1.bar(x + width/2, percent_false_positives, width, label='False Positives', color='salmon')
     ax1.set_xticks(x)
     ax1.set_xticklabels(features)
     ax1.set_title("Face Detection by Angle")
-    ax1.set_ylabel("Count")
+    ax1.set_ylabel("Percentage (%)")
     ax1.legend()
     ax1.grid(axis='y', linestyle='--', alpha=0.6)
 
-    features, num_faces, false_positives = extract_data(by_lighting(detected_faces))
+    features, num_faces, false_positives, num_images = extract_data(by_lighting(detected_faces))
+    percent_faces, percent_false_positives = calculate_percentage(num_faces, false_positives, num_images)
     x = np.arange(len(features))
 
-    ax2.bar(x - width/2, num_faces, width, label='Detected Faces', color='skyblue')
-    ax2.bar(x + width/2, false_positives, width, label='False Positives', color='salmon')
+    ax2.bar(x - width/2, percent_faces, width, label='Detected Faces', color='skyblue')
+    ax2.bar(x + width/2, percent_false_positives, width, label='False Positives', color='salmon')
     ax2.set_xticks(x)
     ax2.set_xticklabels(features)
     ax2.set_title("Face Detection by Lighting")
-    ax2.set_ylabel("Count")
+    ax2.set_ylabel("Percentage (%)")
     ax2.legend()
     ax2.grid(axis='y', linestyle='--', alpha=0.6)
 
-    features, num_faces, false_positives = extract_data(by_missing_feature(detected_faces))
+    features, num_faces, false_positives, num_images = extract_data(by_missing_feature(detected_faces))
+    percent_faces, percent_false_positives = calculate_percentage(num_faces, false_positives, num_images)
     x = np.arange(len(features))
 
-    ax3.bar(x - width/2, num_faces, width, label='Detected Faces', color='skyblue')
-    ax3.bar(x + width/2, false_positives, width, label='False Positives', color='salmon')
+    ax3.bar(x - width/2, percent_faces, width, label='Detected Faces', color='skyblue')
+    ax3.bar(x + width/2, percent_false_positives, width, label='False Positives', color='salmon')
     ax3.set_xticks(x)
     ax3.set_xticklabels(features)
     ax3.set_title("Face Detection by Missing Features")
-    ax3.set_ylabel("Count")
+    ax3.set_ylabel("Percentage (%)")
     ax3.legend()
     ax3.grid(axis='y', linestyle='--', alpha=0.6)
 
-    features, num_faces, false_positives = extract_data(by_mimic(detected_faces))
+    features, num_faces, percent_faces, num_images = extract_data(by_mimic(detected_faces))
+    percent_faces, percent_false_positives = calculate_percentage(num_faces, false_positives, num_images)
     x = np.arange(len(features))
 
-    ax4.bar(x - width/2, num_faces, width, label='Detected Faces', color='skyblue')
-    ax4.bar(x + width/2, false_positives, width, label='False Positives', color='salmon')
+    ax4.bar(x - width/2, percent_faces, width, label='Detected Faces', color='skyblue')
+    ax4.bar(x + width/2, percent_false_positives, width, label='False Positives', color='salmon')
     ax4.set_xticks(x)
     ax4.set_xticklabels(features)
     ax4.set_title("Face Detection by Mimic")
-    ax4.set_ylabel("Count")
+    ax4.set_ylabel("Percentage (%)")
     ax4.legend()
     ax4.grid(axis='y', linestyle='--', alpha=0.6)
 
     plt.tight_layout()
     plt.show()
+
+def calculate_percentage(num_faces, false_positives, num_images):
+    percent_faces = []
+    percent_false_positives = []
+
+    for faces, false_pos, num in zip(num_faces, false_positives, num_images):
+        if num == 0:
+            percent_faces.append(0)
+            percent_false_positives.append(0)
+        else:
+            percent_faces.append((faces / num) * 100)
+            percent_false_positives.append((false_pos / num) * 100)
+
+    return percent_faces, percent_false_positives
