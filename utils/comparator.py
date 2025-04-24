@@ -132,7 +132,7 @@ def show_graphs(detected_faces: dict, is_mtcnn: bool):
     ax3.legend()
     ax3.grid(axis='y', linestyle='--', alpha=0.6)
 
-    features, num_faces, percent_faces, num_images = extract_data(by_mimic(detected_faces))
+    features, num_faces, false_positives, num_images = extract_data(by_mimic(detected_faces))
     percent_faces, percent_false_positives = calculate_percentage(num_faces, false_positives, num_images)
     x = np.arange(len(features))
 
